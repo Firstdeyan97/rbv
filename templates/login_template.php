@@ -8,6 +8,9 @@ function renderLogin($error='', $math='') {
     <title>Ruang Baca Virtual - Login</title>
     <link rel="icon" type="image/webp" href="fav.webp">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.extensions.min.js"></script>
     <style>
         body {
             background: #fffbf0;
