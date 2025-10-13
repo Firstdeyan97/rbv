@@ -3,6 +3,8 @@
 require_once("lib/config.php");
 require_once("lib/common.php");
 require_once("captcha.php");
+require_once ("config/env.php");
+
 session_start();
 //captcha math
 
@@ -266,7 +268,7 @@ $body = '
 			NavToolsVisible: true,
 			CursorToolsVisible: true,
 			ViewModeToolsVisible: true,
-			SearchToolsVisible: true, 
+			SearchToolsVisible: true,
 			PrintToolsVisible: true,
 			DownloadToolsVisible: true,
 			FullScreenVisible: true,
@@ -302,17 +304,17 @@ $body = '
 	html, body {
 		margin: 0;
 		padding: 0;
-		height: 100vh;
+		min-height: 100vh; /* ubah dari height ke min-height */
 		font-family: "Segoe UI", Roboto, sans-serif;
 		background: #000000;
 		color: #fff;
-		overflow: hidden;
+		overflow: auto; /* ubah dari hidden ke auto biar bisa scroll */
 	}
 
 	.viewer-wrapper {
 		display: flex;
 		flex-direction: column;
-		height: 100vh;
+		min-height: 100vh; /* biar ikut body yang bisa scroll */
 		width: 100%;
 	}
 
@@ -325,6 +327,8 @@ $body = '
 		padding: 8px 16px;
 		box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 		z-index: 1001;
+		position: sticky; /* biar navbar nempel di atas saat scroll */
+		top: 0;
 	}
 
 	.nav-left {
@@ -371,7 +375,7 @@ $body = '
 		position: fixed;
 		left: 0;
 		top: 0;
-		height: 100%;
+		bottom: 0;
 		width: 180px;
 		background: #0c1c3a;
 		padding-top: 60px;
@@ -379,6 +383,7 @@ $body = '
 		transform: translateX(-100%);
 		transition: transform 0.3s ease;
 		overflow-y: auto;
+		overflow-x: hidden;
 		z-index: 1000;
 	}
 
@@ -409,7 +414,7 @@ $body = '
 		flex: 1;
 		width: 100%;
 		background: #000;
-		height: calc(100vh - 50px);
+		min-height: calc(100vh - 50px);
 	}
 </style>
 </body>
