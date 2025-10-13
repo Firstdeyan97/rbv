@@ -75,12 +75,14 @@ if(isset($_POST['_submit_check'])) {
 $configManager = new Config();
 $licenseKey = $configManager->getConfig('licensekey');
 $renderingOrder = $configManager->getConfig('renderingorder.primary') . ',' . $configManager->getConfig('renderingorder.secondary');
+$pdfBasePath = $configManager->getConfig('path.pdf');
 
 // ----- VIEWER PARAMS -----
-$subfolder = isset($_GET['modul']) ? rtrim($_GET['modul'],'/').'/' : '';
-$docParam = isset($_GET['doc']) ? $_GET['doc'] : 'DAFIS.pdf';
-$doc = substr($docParam,0,strrpos($docParam,'.'));
-$pdfFilePath = $configManager->getConfig('path.pdf') . $subfolder;
+$subfolder = $_GET['subfolder'] ?? ($_GET['modul'] ?? '');
+$subfolder = rtrim($subfolder,'/') . '/';
+$docParam = $_GET['doc'] ?? 'DAFIS.pdf';
+$doc = pathinfo($docParam, PATHINFO_FILENAME);
+$pdfFilePath = $pdfBasePath . $subfolder;
 
 // ----- BUILD SIDEBAR -----
 $tab = '<th>&nbsp;<a href="index.php?subfolder='.$subfolder.'&doc=DAFIS.pdf">[Daftar Isi]</a>&nbsp;</th>
@@ -96,7 +98,7 @@ if(is_dir($pdfFilePath)) {
         }
     }
     closedir($dh);
-    for($j=1;$j<=($i-2);$j++) {
+    for($j=1; $j<=($i-2); $j++) {
         $tab .= '<th>&nbsp;<a href="index.php?subfolder='.$subfolder.'&doc=M'.$j.'.pdf">[Modul '.$j.']</a>&nbsp;</th>';
     }
 }
@@ -108,6 +110,14 @@ $navTitle = rtrim($subfolder,'/') . ' - ' . strtoupper($doc);
 if(!$_SESSION['loggedin']) {
     renderLogin($error, $math);
 } else {
-    renderViewer($tab, $navTitle, $doc, $pdfFilePath, $licenseKey, $renderingOrder);
+    renderViewer(
+        $tab,
+        $navTitle,
+        $doc,
+        $pdfFilePath,
+        $licenseKey,
+        $renderingOrder,
+        $subfolder
+    );
 }
 ?>

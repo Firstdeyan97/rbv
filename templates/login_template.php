@@ -11,72 +11,145 @@ function renderLogin($error='', $math='') {
     <link rel="stylesheet" type="text/css" href="css/style.css" />
     <script src="js/jquery.min.js"></script>
     <script src="js/jquery.extensions.min.js"></script>
-    <style>
-        body {
-            background: #fffbf0;
-            font-family: "Segoe UI", sans-serif;
-            margin: 0; padding: 0;
-        }
-        .login-container {
-            background: #fff;
-            max-width: 480px;
-            margin: 60px auto;
-            padding: 35px 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-        }
-        .login-header-img {
-            width: 100%;
-            height: auto;
-            border-radius: 12px 12px 0 0;
-            margin-bottom: 20px;
-            display: block;
-            object-fit: cover;
-        }
-        .info-box {
-            background: #e9f4ff;
-            border-left: 4px solid #005baa;
-            padding: 10px 15px;
-            margin-bottom: 25px;
-            font-size: 14px;
-            color: #003f7d;
-        }
-        .form-group { margin-bottom: 15px; }
-        label { display:block; font-weight:600; margin-bottom:6px; color:#003f7d; }
-        input[type=text], input[type=password] {
-            width:100%; padding:10px; border:1px solid #b8c7d9; border-radius:6px; font-size:14px;
-        }
-        .captcha-row { display:flex; align-items:center; gap:10px; }
-        .captcha-text { font-weight:600; font-size:15px; color:#333; }
-        .error-message { margin-top: 15px; color:red; }
-        .divider { text-align:center; margin:15px 0; font-weight:bold; color:#666; }
-        button, .sso-btn {
-            width:100%; padding:10px; border-radius:6px; border:none; cursor:pointer;
-            font-weight:600; color:#fff;
-        }
-        button {
-            background: linear-gradient(90deg, #005baa, #007bff);
-            transition: all 0.3s ease;
-        }
-        button:hover { background: linear-gradient(90deg, #007bff, #005baa); }
-        .sso-btn {
-            display:flex; align-items:center; justify-content:center; gap:8px;
-            background: linear-gradient(90deg,#2F2F2F,#000);
-            text-decoration:none; transition:0.2s;
-            margin-bottom:10px;
-        }
-        .sso-btn:hover { background: linear-gradient(90deg,#000,#2F2F2F); }
-        .about-box {
-            margin-top:25px; background:#f9fafb; padding:15px; border-radius:8px;
-            font-size:13px; color:#444;
-        }
-        .about-box h3 { color:#005baa; font-size:15px; margin-bottom:8px; }
-        a { color:#0073e6; text-decoration:none; }
-        a:hover { text-decoration:underline; }
-        @media (max-width:520px) {
-            .login-container { max-width:90%; padding:25px 20px; }
-        }
-    </style>
+   <style>
+			body {
+				background: #fffbf0;
+				font-family: "Segoe UI", sans-serif;
+				margin: 0;
+				padding: 0;
+			}
+			.login-container {
+				background: #fff;
+				max-width: 480px; /* sebelumnya 420px */
+				margin: 60px auto;
+				padding: 35px 40px; /* sedikit diperlebar juga */
+				border-radius: 12px;
+				box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+				animation: fadeIn 0.7s ease;
+			}
+			@keyframes fadeIn {
+				from { opacity: 0; transform: translateY(10px); }
+				to { opacity: 1; transform: translateY(0); }
+				}
+				h2 {
+				text-align: center;
+				color: #005baa;
+				margin-bottom: 20px;
+			}
+			.info-box {
+			background: #e9f4ff;
+			border-left: 4px solid #005baa;
+			padding: 10px 15px;
+			margin-bottom: 25px;
+			font-size: 14px;
+			color: #003f7d;
+			}
+			.form-group {
+			margin-bottom: 15px;
+			}
+			label {
+			display: block;
+			font-weight: 600;
+			margin-bottom: 6px;
+			color: #003f7d;
+			}
+			input[type=text],
+			input[type=password] {
+			width: 100%;
+			padding: 10px;
+			border: 1px solid #b8c7d9;
+			border-radius: 6px;
+			font-size: 14px;
+			}
+			.captcha-group .captcha-row {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			}
+			.captcha-text {
+			font-weight: 600;
+			font-size: 15px;
+			color: #333;
+			}
+			button {
+			background: linear-gradient(90deg, #005baa, #007bff);
+  			transition: all 0.3s ease;
+			color: #fff;
+			font-weight: 600;
+			width: 100%;
+			padding: 10px 0;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			transition: 0.2s;
+			}
+			button:hover {
+				background: linear-gradient(90deg, #007bff, #005baa);
+				transform: translateY(-1px);
+				box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+			}
+			.error-message {
+			margin-top: 15px;
+			}
+			.about-box {
+			margin-top: 25px;
+			background: #f9fafb;
+			padding: 15px;
+			border-radius: 8px;
+			font-size: 13px;
+			color: #444;
+			}
+			.about-box h3 {
+			color: #005baa;
+			font-size: 15px;
+			margin-bottom: 8px;
+			}
+			a {
+			color: #0073e6;
+			text-decoration: none;
+			}
+			a:hover {
+			text-decoration: underline;
+			}
+			.login-header-img {
+				width: 100%;            /* Gambar selebar form login */
+				height: auto;           /* Tinggi otomatis menyesuaikan proporsinya */
+				border-radius: 12px 12px 0 0;  /* Sudut atas melengkung sama kayak box */
+				margin-bottom: 20px;    /* Jarak bawah gambar ke judul */
+				display: block;
+				object-fit: cover;      /* Pastikan gambar tetap rapi */
+			}
+			@media (max-width: 520px) {
+				.login-container {
+					max-width: 90%;
+					padding: 25px 20px;
+				}
+			}
+
+			.divider {
+			text-align: center;
+			margin: 15px 0;
+			font-weight: bold;
+			color: #666;
+			}
+			.sso-btn {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			background: linear-gradient(90deg, #2F2F2F, #000);
+			color: white;
+			padding: 10px;
+			border-radius: 6px;
+			text-decoration: none;
+			transition: 0.2s;
+			}
+			.sso-btn:hover {
+			background: linear-gradient(90deg, #000, #2F2F2F);
+				transform: translateY(-1px);
+				box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+			}
+		</style>
 </head>
 <body>
 <div class="login-container">
