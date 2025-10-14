@@ -3,8 +3,6 @@
 require_once("lib/config.php");
 require_once("lib/common.php");
 require_once("captcha.php");
-require_once ("config/env.php");
-
 session_start();
 //captcha math
 
@@ -308,7 +306,6 @@ $body = '
 		font-family: "Segoe UI", Roboto, sans-serif;
 		background: #000000;
 		color: #fff;
-		overflow: auto; /* ubah dari hidden ke auto biar bisa scroll */
 	}
 
 	.viewer-wrapper {

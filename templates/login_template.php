@@ -1,17 +1,45 @@
 <?php
 function renderLogin($error='', $math='') {
-    ?>
+
+    if (substr($_SESSION['UID'],0,9)=='mahasiswa') {
+		$analytic='
+			<!-- Global site tag (gtag.js) - Google Analytics -->
+			<script async src="https://www.googletagmanager.com/gtag/js?id=UA-1591318-8"></script>
+			<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag(\'js\', new Date());
+			gtag(\'config\',\'UA-1591318-8\');
+			</script>';
+	}
+    else {
+	$analytic='
+			<!-- Global site tag (gtag.js) - Google Analytics -->
+			<script async src="https://www.googletagmanager.com/gtag/js?id=UA-1591318-5"></script>
+			<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag(\'js\', new Date());
+			gtag(\'config\',\'UA-1591318-5\');
+			</script>';
+	}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <title>Ruang Baca Virtual - Login</title>
     <link rel="icon" type="image/webp" href="fav.webp">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script type="text/javascript" src="js/simpletabs_1.3.js"></script>
+	<style type="text/css" media="screen">@import "css/simpletabs.css";</style>
     <link rel="stylesheet" type="text/css" href="css/style.css" />
     <script src="js/jquery.min.js"></script>
     <script src="js/jquery.extensions.min.js"></script>
-   <style>
+    <?php echo $analytic ?>
+    <style>
 			body {
 				background: #fffbf0;
 				font-family: "Segoe UI", sans-serif;
@@ -22,7 +50,7 @@ function renderLogin($error='', $math='') {
 				background: #fff;
 				max-width: 480px; /* sebelumnya 420px */
 				margin: 60px auto;
-				padding: 35px 40px; /* sedikit diperlebar juga */
+				padding: 35px 40px; /* sedikit diFlebar juga */
 				border-radius: 12px;
 				box-shadow: 0 8px 24px rgba(0,0,0,0.3);
 				animation: fadeIn 0.7s ease;
@@ -90,6 +118,7 @@ function renderLogin($error='', $math='') {
 			}
 			.error-message {
 			margin-top: 15px;
+            color: #f80303ff;
 			}
 			.about-box {
 			margin-top: 25px;
@@ -157,25 +186,25 @@ function renderLogin($error='', $math='') {
     
     <div class="info-box">
         <p>
-            Gunakan login Single Sign-On (SSO) Microsoft o365 UT <strong>(ecampus.ut.ac.id)</strong><br>
-            atau<br>
-            Mengisi username dan password <strong>UT-Online (elearning.ut.ac.id)</strong> serta <strong>Captcha</strong> untuk akses Ruang Baca Virtual (RBV).
+            Gunakan login <strong>Single Sign-On (SSO) Microsoft o365 UT (ecampus.ut.ac.id)</strong>
         </p>
     </div>
-
-    <?php if($error): ?>
-        <div class="error-message"><?php echo $error; ?></div>
-    <?php endif; ?>
 
     <form method="post" action="">
         <input type="hidden" name="_submit_check" value="1"/>
 
         <a href="oauth/login.php" class="sso-btn" id="microsoft-login">
             <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" width="18" alt="Microsoft">
-            Login dengan Microsoft 365
+            Login dengan SSO O365-UT (ecampus.ut.ac.id)
         </a>
 
         <div class="divider">atau</div>
+
+        <div class="info-box">
+        <p>
+            Masukan Username dan Password <strong>UT-Online (elearning.ut.ac.id)</strong> serta <strong>Captcha</strong>.
+        </p>
+        </div>
 
         <div class="form-group">
             <label for="username">Username</label>
@@ -185,6 +214,7 @@ function renderLogin($error='', $math='') {
         <div class="form-group">
             <label for="password">Password</label>
             <input type="password" name="password" id="password" placeholder="Masukan Password" required>
+             <!-- Password akan diencrypt di server menggunakan public.pem -->
         </div>
 
         <div class="form-group captcha-group">
@@ -195,11 +225,15 @@ function renderLogin($error='', $math='') {
             </div>
         </div>
 
-        <button type="submit" name="submit">Login</button>
+        <button type="submit">Login</button>
     </form>
 
+     <?php if($error): ?>
+        <div class="error-message"><strong>Perhatian: </strong><?php echo $error; ?></div>
+    <?php endif; ?>
+
     <div class="about-box">
-        <h3>Tentang RBV V.2</h3>
+        <h3>Tentang RBV</h3>
         <p>Ruang Baca Virtual UT adalah fasilitas pembelajaran yang berisi Buku Materi Pokok (<em>full text</em>) bagi mahasiswa dan tutor dengan akses ke Tutorial Online UT.</p>
         <p>Seluruh isi dilindungi oleh HAKI. Dilarang menyimpan, menduplikasi, atau menyebarkan isi tanpa izin resmi dari Universitas Terbuka.</p>
     </div>
@@ -214,8 +248,113 @@ function renderLogin($error='', $math='') {
         link.href = "oauth/login.php?modul=" + encodeURIComponent(modul);
     }
 </script>
+<!-- START: Client-side RSA-OAEP encryption (Web Crypto) -->
+<script>
+    /* PEM -> ArrayBuffer */
+    function pemToArrayBuffer(pem) {
+    const b64 = pem.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes.buffer;
+    }
+
+    /* import SPKI public key */
+    async function importPublicKey(pemText) {
+    const ab = await pemToArrayBuffer(pemText);
+    return await crypto.subtle.importKey(
+        'spki',
+        ab,
+        { name: 'RSA-OAEP', hash: { name: 'SHA-1' } }, // OAEP+SHA1 compatible with OpenSSL default
+        false,
+        ['encrypt']
+    );
+    }
+
+    /* encrypt text -> base64 */
+    async function encryptWithPublicKey(pubKey, text) {
+    const encoded = new TextEncoder().encode(text);
+    const cipher = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, pubKey, encoded);
+    const u8 = new Uint8Array(cipher);
+    let s = '';
+    for (let i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]);
+    return btoa(s);
+    }
+
+    /* main: intercept submit */
+    document.addEventListener('DOMContentLoaded', function(){
+    const form = document.querySelector('form[method="post"]');
+    if (!form) return;
+
+    // load public key once
+const pubKeyPromise = fetch('pubkey.php', { cache: 'no-store' })
+    .then(r => r.ok ? r.text() : null)   // kalau gagal fetch, return null
+    .then(pem => pem ? importPublicKey(pem) : null)
+    .catch(e => null);  // silent fail, tidak munculin error
+
+
+
+    form.addEventListener('submit', async function(e){
+        e.preventDefault();
+
+        const pwdInput = form.querySelector('input[name="password"]');
+        if (!pwdInput) return form.submit();
+
+        const pwd = (pwdInput.value || '').trim();
+        if (!pwd) return form.submit();
+
+        try {
+        const pubKey = await pubKeyPromise;
+        if (pubKey) {
+            const payload = JSON.stringify({ pw: pwd, t: Date.now() });
+            const ct = await encryptWithPublicKey(pubKey, payload);
+
+            // ensure hidden field exists
+            let hf = form.querySelector('input[name="password_enc"]');
+            if (!hf) {
+                hf = document.createElement('input');
+                hf.type = 'hidden';
+                hf.name = 'password_enc';
+                form.appendChild(hf);
+            }
+            hf.value = ct;
+
+            // clear plaintext asap
+            pwdInput.value = '';
+            pwdInput.setAttribute('autocomplete','new-password');
+        }
+
+        // submit anyway
+        form.submit();
+
+
+        // ensure hidden field exists
+        let hf = form.querySelector('input[name="password_enc"]');
+        if (!hf) {
+            hf = document.createElement('input');
+            hf.type = 'hidden';
+            hf.name = 'password_enc';
+            form.appendChild(hf);
+        }
+        hf.value = ct;
+
+        // clear plaintext asap
+        pwdInput.value = '';
+        pwdInput.setAttribute('autocomplete','new-password');
+
+        // submit
+        form.submit();
+        } catch (err) {
+        console.error('Encrypt failed, submitting plaintext as fallback', err);
+        form.submit();
+        }
+    });
+    });
+</script>
+<!-- END: Client-side RSA-OAEP encryption -->
 </body>
 </html>
+
 <?php
 }
 ?>
