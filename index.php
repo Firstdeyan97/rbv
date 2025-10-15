@@ -147,8 +147,11 @@ if (!isset($_GET['modul']) || trim($_GET['modul']) === '') {
         header("Location: modul_required.php");
         exit;
     }
-    // kalau sudah login, boleh lanjut meskipun modul belum dipilih
-    // misal tampil halaman default / dashboard
+    elseif (!isset($_GET['subfolder']) || trim($_GET['subfolder']) === '') {
+        // user sudah login tapi param subfolder kosong → juga ke modul_required
+        header("Location: modul_required.php");
+        exit;
+    }
 }
 
 // ----- CONFIG MANAGER -----
@@ -215,13 +218,28 @@ if (is_array($judulData)) {
     }
 }
 
-// rakit navTitle
-if ($judulFound) {
-    $navTitle = "{$cleanSubfolder} - {$judulFound} - " . strtoupper($doc);
-} else {
-    $navTitle = "{$cleanSubfolder} - " . strtoupper($doc);
+function formatDocName($doc) {
+    $doc = strtoupper($doc); // biar konsisten pengecekan
+    switch($doc) {
+        case 'DAFIS':
+            return 'Daftar Isi';
+        case 'TINJAUAN':
+            return 'Tinjauan Mata Kuliah';
+        default:
+            // jika mulai dengan M diikuti angka, misal M1, M2, M3
+            if (preg_match('/^M\d+$/', $doc)) {
+                return 'Modul ' . substr($doc, 1);
+            }
+            return $doc; // selain itu dikembalikan apa adanya
+    }
 }
 
+// rakit navTitle
+if ($judulFound) {
+    $navTitle = "{$cleanSubfolder} - {$judulFound} - " . formatDocName($doc);
+} else {
+    $navTitle = "{$cleanSubfolder} - " . formatDocName($doc);
+}
 
 // ----- RENDER -----
 if(!$_SESSION['loggedin']) {
