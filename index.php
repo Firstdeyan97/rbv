@@ -141,18 +141,17 @@ $_SESSION['vercode'] = $n1 + $n2;
 $math = "Berapa hasil dari <strong>{$n1} + {$n2}</strong> = ";
 
 // ----- CEK MODUL -----
-if (!isset($_GET['modul']) || trim($_GET['modul']) === '') {
-    // kalau user belum login, redirect ke modul_required.php
-    if(!$_SESSION['loggedin']) {
-        header("Location: modul_required.php");
-        exit;
-    }
-    elseif (!isset($_GET['subfolder']) || trim($_GET['subfolder']) === '') {
-        // user sudah login tapi param subfolder kosong → juga ke modul_required
+if ($_SESSION['loggedin']) {
+    if (
+        (!isset($_GET['modul']) || trim($_GET['modul']) === '') &&
+        (!isset($_GET['subfolder']) || trim($_GET['subfolder']) === '')
+    ) {
+        // Sudah login tapi modul dan subfolder kosong → ke modul_required
         header("Location: modul_required.php");
         exit;
     }
 }
+
 
 // ----- CONFIG MANAGER -----
 $configManager = new Config();
