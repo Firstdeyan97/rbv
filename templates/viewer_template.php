@@ -43,9 +43,9 @@ function renderViewer($tab, $navTitle, $doc, $pdfFilePath, $licenseKey, $renderi
     <link rel="stylesheet" type="text/css" href="css/style.css" />
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/jquery.extensions.min.js"></script>
-    <!--[if gte IE 10 | !IE ]><!-->
+   
     <script type="text/javascript" src="js/three.min.js"></script>
-    <!--<![endif]-->
+   
     <script type="text/javascript" src="js/flowpaper.js"></script>
     <script type="text/javascript" src="js/flowpaper_handlers.js"></script>
     <?php echo $analytic ?>
@@ -64,7 +64,7 @@ function renderViewer($tab, $navTitle, $doc, $pdfFilePath, $licenseKey, $renderi
             min-height: 100vh;
             width: 100%;
         }
-        /* NAVBAR */
+       
         .viewer-header { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(90deg, #002daaff, #0073e6); padding: 8px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 1001; position: sticky; top: 0; }
         .nav-left { display: flex; align-items: center; gap: 10px; }
         .menu-btn { background: linear-gradient(90deg, #002daaff, #0073e6); border: none; color: #fff; font-size: 22px; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; }
@@ -73,27 +73,25 @@ function renderViewer($tab, $navTitle, $doc, $pdfFilePath, $licenseKey, $renderi
         .nav-right { display: flex; align-items: center; }
         .logout-icon { background: #d32f2f; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: background 0.2s; }
         .logout-icon:hover { background: #b71c1c; }
-        /* SIDEBAR */
+       
         .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 180px; background: #0c1c3a; padding-top: 60px; box-shadow: 2px 0 8px rgba(0,0,0,0.4); transform: translateX(-100%); transition: transform 0.3s ease; overflow-y: auto; overflow-x: hidden; z-index: 1000; }
         .sidebar.active { transform: translateX(0); }
         .sidebar-nav { display: flex; flex-direction: column; }
         .sidebar-nav a { color: #e2eaff; padding: 10px 15px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
         .sidebar-nav a:hover { background: linear-gradient(90deg, #0073e6, #005baa); transform: translateX(5px); }
-        /* VIEWER */
+      
         #documentViewer { flex: 1; width: 100%; background: #000; min-height: calc(100vh - 50px); }
     </style>
 </head>
 <body>
 <div class="viewer-wrapper">
 
-    <!-- SIDEBAR -->
     <aside id="sidebar" class="sidebar active">
         <nav class="sidebar-nav">
             <?php echo $tab; ?>
         </nav>
     </aside>
 
-    <!-- NAVBAR -->
     <header class="viewer-header">
         <div class="nav-left">
             <button id="toggleSidebar" class="menu-btn" title="Menu">☰</button>
@@ -109,7 +107,6 @@ function renderViewer($tab, $navTitle, $doc, $pdfFilePath, $licenseKey, $renderi
         </div>
     </header>
 
-    <!-- VIEWER -->
     <main id="documentViewer" class="flowpaper_viewer"></main>
 
 <script>

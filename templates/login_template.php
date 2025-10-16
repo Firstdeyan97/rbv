@@ -48,9 +48,9 @@ function renderLogin($error='', $math='') {
 			}
 			.login-container {
 				background: #fff;
-				max-width: 480px; /* sebelumnya 420px */
+				max-width: 480px; 
 				margin: 60px auto;
-				padding: 35px 40px; /* sedikit diFlebar juga */
+				padding: 35px 40px; 
 				border-radius: 12px;
 				box-shadow: 0 8px 24px rgba(0,0,0,0.3);
 				animation: fadeIn 0.7s ease;
@@ -141,12 +141,12 @@ function renderLogin($error='', $math='') {
 			text-decoration: underline;
 			}
 			.login-header-img {
-				width: 100%;            /* Gambar selebar form login */
-				height: auto;           /* Tinggi otomatis menyesuaikan proporsinya */
-				border-radius: 12px 12px 0 0;  /* Sudut atas melengkung sama kayak box */
-				margin-bottom: 20px;    /* Jarak bawah gambar ke judul */
+				width: 100%;            
+				height: auto;           
+				border-radius: 12px 12px 0 0;  
+				margin-bottom: 20px;    
 				display: block;
-				object-fit: cover;      /* Pastikan gambar tetap rapi */
+				object-fit: cover;      
 			}
 			@media (max-width: 520px) {
 				.login-container {
@@ -214,7 +214,6 @@ function renderLogin($error='', $math='') {
         <div class="form-group">
             <label for="password">Password</label>
             <input type="password" name="password" id="password" placeholder="Masukan Password" required>
-             <!-- Password akan diencrypt di server menggunakan public.pem -->
         </div>
 
         <div class="form-group captcha-group">
@@ -240,7 +239,7 @@ function renderLogin($error='', $math='') {
 </div>
 
 <script>
-    // Kirim modul/subfolder ke SSO Microsoft
+    
     const params = new URLSearchParams(window.location.search);
     const modul = params.get("modul") || params.get("subfolder") || "";
     if (modul) {
@@ -248,9 +247,9 @@ function renderLogin($error='', $math='') {
         link.href = "oauth/login.php?modul=" + encodeURIComponent(modul);
     }
 </script>
-<!-- START: Client-side RSA-OAEP encryption (Web Crypto) -->
+
 <script>
-    /* PEM -> ArrayBuffer */
+    
     function pemToArrayBuffer(pem) {
     const b64 = pem.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
     const bin = atob(b64);
@@ -259,7 +258,7 @@ function renderLogin($error='', $math='') {
     return bytes.buffer;
     }
 
-    /* import SPKI public key */
+    
     async function importPublicKey(pemText) {
     const ab = await pemToArrayBuffer(pemText);
     return await crypto.subtle.importKey(
@@ -271,7 +270,7 @@ function renderLogin($error='', $math='') {
     );
     }
 
-    /* encrypt text -> base64 */
+
     async function encryptWithPublicKey(pubKey, text) {
     const encoded = new TextEncoder().encode(text);
     const cipher = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, pubKey, encoded);
@@ -281,16 +280,16 @@ function renderLogin($error='', $math='') {
     return btoa(s);
     }
 
-    /* main: intercept submit */
+    
     document.addEventListener('DOMContentLoaded', function(){
     const form = document.querySelector('form[method="post"]');
     if (!form) return;
 
-    // load public key once
+    
 const pubKeyPromise = fetch('pubkey.php', { cache: 'no-store' })
-    .then(r => r.ok ? r.text() : null)   // kalau gagal fetch, return null
+    .then(r => r.ok ? r.text() : null)   
     .then(pem => pem ? importPublicKey(pem) : null)
-    .catch(e => null);  // silent fail, tidak munculin error
+    .catch(e => null);  
 
 
 
@@ -309,7 +308,7 @@ const pubKeyPromise = fetch('pubkey.php', { cache: 'no-store' })
             const payload = JSON.stringify({ pw: pwd, t: Date.now() });
             const ct = await encryptWithPublicKey(pubKey, payload);
 
-            // ensure hidden field exists
+            
             let hf = form.querySelector('input[name="password_enc"]');
             if (!hf) {
                 hf = document.createElement('input');
@@ -319,16 +318,13 @@ const pubKeyPromise = fetch('pubkey.php', { cache: 'no-store' })
             }
             hf.value = ct;
 
-            // clear plaintext asap
             pwdInput.value = '';
             pwdInput.setAttribute('autocomplete','new-password');
         }
 
-        // submit anyway
         form.submit();
 
 
-        // ensure hidden field exists
         let hf = form.querySelector('input[name="password_enc"]');
         if (!hf) {
             hf = document.createElement('input');
@@ -338,11 +334,9 @@ const pubKeyPromise = fetch('pubkey.php', { cache: 'no-store' })
         }
         hf.value = ct;
 
-        // clear plaintext asap
         pwdInput.value = '';
         pwdInput.setAttribute('autocomplete','new-password');
 
-        // submit
         form.submit();
         } catch (err) {
         console.error('Encrypt failed, submitting plaintext as fallback', err);
@@ -351,7 +345,6 @@ const pubKeyPromise = fetch('pubkey.php', { cache: 'no-store' })
     });
     });
 </script>
-<!-- END: Client-side RSA-OAEP encryption -->
 </body>
 </html>
 
