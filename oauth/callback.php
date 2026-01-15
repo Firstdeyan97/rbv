@@ -6,7 +6,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
-// ob_start();
+ob_start();
 
 require_once __DIR__ . '/../config/env.php';
 require_once __DIR__ . '/../lib/db.php';
@@ -55,6 +55,12 @@ $response = curl_exec($ch);
 $curlErr  = curl_error($ch);
 curl_close($ch);
 
+echo "<script>";
+echo "console.log('Token Request URL:', " . json_encode($token_url) . ");";
+echo "console.log('Token Request Data:', " . json_encode($token_data) . ");";
+echo "console.log('Token Raw Response:', " . json_encode($response) . ");";
+echo "console.log('Token Curl Error:', " . json_encode($curlErr) . ");";
+echo "</script>";
 
 if (!$response) {
     http_response_code(502);
@@ -67,6 +73,7 @@ if (empty($token['access_token'])) {
     die("Gagal mendapatkan token akses.");
 }
 
+// ===== 5) Ambil profil dari Graph =====
 $user_info_url = "https://graph.microsoft.com/v1.0/me";
 $ch = curl_init($user_info_url);
 curl_setopt_array($ch, [
@@ -77,6 +84,12 @@ curl_setopt_array($ch, [
 $user_response = curl_exec($ch);
 $curlErrUser   = curl_error($ch);
 curl_close($ch);
+
+echo "<script>";
+echo "console.log('Graph Request URL:', " . json_encode($user_info_url) . ");";
+echo "console.log('Graph Raw Response:', " . json_encode($user_response) . ");";
+echo "console.log('Graph Curl Error:', " . json_encode($curlErrUser) . ");";
+echo "</script>";
 
 if (!$user_response) {
     http_response_code(502);
@@ -92,6 +105,12 @@ if (empty($user['userPrincipalName'])) {
 $emailGraph   = strtolower(trim($user['userPrincipalName']));
 $displayName  = $user['displayName'] ?? '';
 
+echo "<script>";
+echo "console.log('Email Graph:', " . json_encode($emailGraph) . ");";
+echo "console.log('Display Name:', " . json_encode($displayName) . ");";
+echo "</script>";
+
+// ===== 6) Deteksi tipe user =====
 $isMahasiswa = (bool)preg_match('/^(\d{6,})@ecampus\.ut\.ac\.id$/i', $emailGraph);
 $isPegawai   = !$isMahasiswa && (bool)preg_match('/@ecampus\.ut\.ac\.id$/i', $emailGraph);
 
@@ -100,13 +119,19 @@ echo "console.log('isMahasiswa:', " . json_encode($isMahasiswa) . ");";
 echo "console.log('isPegawai:', " . json_encode($isPegawai) . ");";
 echo "</script>";
 
+// ===== 7) Ambil token SRS =====
 $srs_email    = env('SRS_EMAIL');
 $srs_password = env('SRS_PASSWORD');
 $srs_token    = null;
 if ($srs_email && $srs_password) {
     $srs_token = srs_auth_token($srs_email, $srs_password);
 }
+echo "<script>";
+echo "console.log('SRS Email:', " . json_encode($srs_email) . ");";
+echo "console.log('SRS Token:', " . json_encode($srs_token) . ");";
+echo "</script>";
 
+// ===== 10) Mapping data =====
 date_default_timezone_set('Asia/Jakarta');
 $start_time        = date('Y-m-d H:i:s');
 $email_or_username = $emailGraph;
@@ -156,6 +181,7 @@ if ($isMahasiswa && $srs_token) {
     }
 }
 
+// ===== Insert log =====
 $hasData = ($isMahasiswa && !empty($mhs)) || ($isPegawai && !empty($peg));
 echo "<script>console.log('HasData:', " . json_encode($hasData) . ");</script>";
 
@@ -212,5 +238,5 @@ echo "console.log('Redirect URL:', " . json_encode($redirect_url) . ");";
 echo "</script>";
 
 header("Location: $redirect_url");
-// ob_end_flush();
+ob_end_flush();
 exit;

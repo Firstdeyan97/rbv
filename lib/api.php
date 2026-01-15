@@ -43,18 +43,18 @@ function srs_fetch_mahasiswa(string $nim, string $token): ?array {
     $res = curl_exec($ch);
     curl_close($ch);
 
-    // echo "<script>";
-    // echo "console.log('Mahasiswa API Request URL:', " . json_encode($url) . ");";
-    // echo "console.log('Mahasiswa API Raw Response:', " . json_encode($res) . ");";
-    // echo "</script>";
+    echo "<script>";
+    echo "console.log('Mahasiswa API Request URL:', " . json_encode($url) . ");";
+    echo "console.log('Mahasiswa API Raw Response:', " . json_encode($res) . ");";
+    echo "</script>";
 
     if (!$res) return null;
 
     $data = json_decode($res, true);
 
-    // echo "<script>";
-    // echo "console.log('Mahasiswa API Decoded:', " . json_encode($data) . ");";
-    // echo "</script>";
+    echo "<script>";
+    echo "console.log('Mahasiswa API Decoded:', " . json_encode($data) . ");";
+    echo "</script>";
 
     // Perbaikan: data adalah object, bukan array
     return (!empty($data['status']) && !empty($data['data'])) ? $data['data'] : null;
@@ -106,11 +106,11 @@ function srs_fetch_tutor($id_tutor, $token) {
     $data = json_decode($res, true);
 
     // === DEBUG OUTPUT ke console ===
-    // echo "<script>";
-    // echo "console.log('Tutor API Request URL: " . addslashes($url) . "');";
-    // echo "console.log('Tutor API Raw Response:', " . json_encode($res) . ");";
-    // echo "console.log('Tutor API Decoded:', " . json_encode($data) . ");";
-    // echo "</script>";
+    echo "<script>";
+    echo "console.log('Tutor API Request URL: " . addslashes($url) . "');";
+    echo "console.log('Tutor API Raw Response:', " . json_encode($res) . ");";
+    echo "console.log('Tutor API Decoded:', " . json_encode($data) . ");";
+    echo "</script>";
 
     return (!empty($data['status']) && !empty($data['data'][0])) ? $data['data'][0] : null;
 }
