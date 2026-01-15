@@ -3,6 +3,7 @@ session_start();
 
 require_once("lib/config.php");
 require_once("lib/common.php");
+require_once("lib/db.php");
 require_once("captcha.php");
 require_once("config/env.php");
 
@@ -51,7 +52,6 @@ if (isset($_POST['_submit_check'])) {
             } else {
                 $decrypted = null;
                 $ok = openssl_private_decrypt($cipher, $decrypted, $priv, OPENSSL_PKCS1_OAEP_PADDING);
-                openssl_free_key($priv);
                 if ($ok === false) {
                     $error = 'Gagal mendekripsi password.';
                 } else {
@@ -221,6 +221,10 @@ if ($judulFound) {
 if(!$_SESSION['loggedin']) {
     renderLogin($error, $math);
 } else {
+    // Ambil kode modul dari URL atau subfolder
+    $modul = $_GET['modul'] ?? ($cleanSubfolder ?? null);
+
+    // Tetap render viewer (jangan diubah)
     renderViewer(
         $tab,
         $navTitle,
@@ -230,5 +234,174 @@ if(!$_SESSION['loggedin']) {
         $renderingOrder,
         $subfolder
     );
+
+    // === Insert log akses modul (conditional) ===
+    require_once __DIR__ . '/lib/db.php';
+    require_once __DIR__ . '/lib/api.php'; // berisi fungsi SRS
+
+    date_default_timezone_set('Asia/Jakarta'); // WIB
+
+    $email_or_username = $_SESSION['UID'] ?? ''; // bisa kosong kalau SSO
+    $length            = strlen($email_or_username);
+    $start_time        = date('Y-m-d H:i:s');
+
+    // Cek modul sebelumnya di session
+    $prevModul   = $_SESSION['current_modul'] ?? null;
+    $isNewModul  = ($modul && $modul !== $prevModul);
+
+    // Ambil credential SRS dari env
+    $srs_email    = env('SRS_EMAIL');
+    $srs_password = env('SRS_PASSWORD');
+    if (!$srs_email || !$srs_password) {
+        error_log('SRS_EMAIL/SRS_PASSWORD belum dikonfigurasi di environment.');
+    }
+
+    $srs_token = null;
+    if ($srs_email && $srs_password) {
+        $srs_token = srs_auth_token($srs_email, $srs_password);
+        if (!$srs_token) {
+            error_log('Gagal mendapatkan token SRS.');
+        }
+    }
+
+    // Insert hanya jika modul baru DAN username valid (8/9 digit) ATAU email pegawai
+    $shouldInsert = (
+        $isNewModul &&
+        (
+            $email_or_username !== '' || ($length === 8 || $length === 9)
+        )
+    );
+
+    if ($shouldInsert) {
+        $NIM = $NIP = $nama_lengkap = $prodi = $fakultas = $unit_kerja = null;
+        $hasData = false;
+
+        if ($srs_token) {
+            if ($length === 9) {
+                // Mahasiswa
+                $mhs = srs_fetch_mahasiswa($email_or_username, $srs_token);
+                if (!empty($mhs)) {
+                    $NIM          = $mhs['nim'] ?? $email_or_username;
+                    $nama_lengkap = $mhs['nama_mahasiswa'] ?? null;
+                    $prodi        = $mhs['info_ut']['program_studi']['nama_program_studi']
+                                    ?? $mhs['info_ut']['nama_program_studi'] ?? null;
+                    $fakultas     = $mhs['info_ut']['program_studi']['fakultas']['nama_fakultas']
+                                    ?? $mhs['info_ut']['fakultas']['nama_fakultas'] ?? null;
+                    $unit_kerja   = null;
+                    $hasData      = true;
+                }
+            } elseif ($length === 8) {
+                // Tutor
+                $tutor = srs_fetch_tutor($email_or_username, $srs_token);
+                if (!empty($tutor)) {
+                    $NIP          = $tutor['nip'] ?? null;
+                    $nama_lengkap = $tutor['nama_lengkap'] ?? null;
+                    $fakultas     = $tutor['nama_fakultas'] ?? null;
+                    $prodi        = 'nan';
+                    $unit_kerja   = 'nan';
+                    $hasData      = true;
+                }
+            } elseif (preg_match('/@ecampus\.ut\.ac\.id$/i', $email_or_username)) {
+                $isMahasiswa = (bool)preg_match('/^(\d{6,})@ecampus\.ut\.ac\.id$/i', $email_or_username);
+                $isPegawai   = !$isMahasiswa && (bool)preg_match('/@ecampus\.ut\.ac\.id$/i', $email_or_username);
+                if ($isPegawai) {  
+                    // Pegawai (SSO)
+                    $peg = srs_fetch_pegawai_by_email($email_or_username, $srs_token);
+                    if (!empty($peg)) {
+                        $NIP          = $peg['nip'] ?? null;
+                        $nama_lengkap = $peg['nama'] ?? null;
+                        $unit_kerja   = $peg['nama_unit'] ?? null;
+                        $fakultas     = 'nan';
+                        $prodi        = 'nan';
+                        $hasData      = true;
+                    }
+                }else{
+                    // Mahasiswa (SSO)
+                    preg_match('/^(\d{6,})@ecampus\.ut\.ac\.id$/i', $email_or_username, $m);
+                    $nim = $m[1] ?? null;
+                    echo "console.log('nim: {$nim}');";
+                    if ($nim) {
+                        $mhs = srs_fetch_mahasiswa($nim, $srs_token);
+                        if ($mhs) {
+                            $NIM               = $mhs['nim'] ?? $nim;
+                            $email_or_username = $NIM . '@ecampus.ut.ac.id';
+                            $nama_lengkap      = $mhs['nama_mahasiswa'] ?? null;
+                            $prodi             = $mhs['info_ut']['program_studi']['nama_program_studi'] ?? null;
+                            $fakultas          = $mhs['info_ut']['program_studi']['fakultas']['nama_fakultas'] ?? null;
+                            $hasData = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Insert log hanya jika data valid
+        if ($hasData) {
+            try {
+                $stmt = $pdo->prepare("
+                    INSERT INTO rbv_logs 
+                        (email_or_username, NIM, NIP, nama_lengkap, modul, prodi, fakultas, unit_kerja, start_time) 
+                    VALUES 
+                        (:email_or_username, :NIM, :NIP, :nama_lengkap, :modul, :prodi, :fakultas, :unit_kerja, :start_time)
+                ");
+                $stmt->execute([
+                    ':email_or_username' => $email_or_username,
+                    ':NIM'               => $NIM,
+                    ':NIP'               => $NIP,
+                    ':nama_lengkap'      => $nama_lengkap,
+                    ':modul'             => $modul,
+                    ':prodi'             => $prodi,
+                    ':fakultas'          => $fakultas,
+                    ':unit_kerja'        => $unit_kerja,
+                    ':start_time'        => $start_time
+                ]);
+
+                // Simpan modul aktif & ID log di session
+                $_SESSION['current_modul'] = $modul;
+                $_SESSION['log_id_modul']  = (int)$pdo->lastInsertId();
+
+                // Debug ke console (bisa dikomen)
+                echo "<script>";
+                echo "console.log('Log baru dimasukkan untuk modul: " . addslashes($modul) . "');";
+                echo "console.log('log_id_modul:', " . json_encode($_SESSION['log_id_modul']) . ");";
+                echo "</script>";
+            } catch (Exception $e) {
+                error_log("Insert rbv_logs gagal: " . $e->getMessage());
+            }
+        }
+    }
+
+    // ===== DEBUG CALLBACK (bisa dikomen kapan saja) =====
+    echo "<script>";
+    echo "console.log('Email/Username: " . addslashes($email_or_username !== '' ? $email_or_username : 'null') . "');";
+    echo "console.log('Panjang Username: {$length}');";
+    echo "console.log('Should Insert: " . ($shouldInsert ? 'YES' : 'NO') . "');";
+    echo "console.log('Modul: " . addslashes($modul ?? 'null') . "');";
+    echo "console.log('Start Time: {$start_time}');";
+    echo "console.log('prev modul: {$prevModul}');";
+    echo "console.log('now modul: {$modul}');";
+    echo "console.log('isMahasiswa: {$isMahasiswa}');";
+    echo "console.log('isPegawai: {$isPegawai}');";
+    if ($shouldInsert) {
+        $debugData = [
+            'email_or_username' => $email_or_username,
+            'NIM'               => $NIM ?? null,
+            'NIP'               => $NIP ?? null,
+            'nama_lengkap'      => $nama_lengkap ?? null,
+            'prodi'             => $prodi ?? null,
+            'fakultas'          => $fakultas ?? null,
+            'unit_kerja'        => $unit_kerja ?? null,
+            'modul'             => $modul,
+            'start_time'        => $start_time,
+            'last_insert_id'    => $_SESSION['log_id_modul'] ?? 'null'
+        ];
+        echo "console.log('Data Mapping:', " . json_encode($debugData) . ");";
+    } else {
+        echo "console.log('Skip insert (username kosong atau panjang bukan 8/9 atau bukan email pegawai)');";
+    }
+    echo "</script>";
 }
+
+
+
 ?>

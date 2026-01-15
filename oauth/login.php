@@ -1,12 +1,10 @@
 <?php
-require_once __DIR__ . '/../config/env.php';
 // --- login.php ---
 $modul = isset($_GET['modul']) ? trim($_GET['modul']) : '';
 
-$client_id     = env('AZURE_CLIENT_ID');
-$client_secret = env('AZURE_CLIENT_SECRET');
-$tenant_id     = env('AZURE_TENANT_ID');
-$redirect_uri  = env('AZURE_REDIRECT_URI');
+$client_id     = '0b6f20f2-55b3-4f11-ae91-cfbddcce48a7';
+$tenant_id     = '508916a0-7b89-43a1-af4e-72fe15aba5b9';
+$redirect_uri  = 'https://pustaka.ut.ac.id/reader/oauth/callback.php';
 $scope         = 'openid profile email User.Read';
 
 // Simpan modul di state (dalam bentuk base64 JSON)

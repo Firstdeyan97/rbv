@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Ruang Baca Virtual - Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/webp" href="fav.webp">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    body {
+      background: #fffbf0;
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .login-container {
+      background: #fff;
+      max-width: 480px;
+      margin: 60px auto;
+      padding: 35px 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      animation: fadeIn 0.7s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h2 {
+      text-align: center;
+      color: #005baa;
+      margin-bottom: 20px;
+    }
+    .choice-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(90deg, #005baa, #007bff);
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 15px;
+      transition: all 0.2s;
+    }
+    .choice-btn:hover {
+      background: linear-gradient(90deg, #007bff, #005baa);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .login-form {
+      display: none;
+      margin-top: 20px;
+      animation: fadeIn 0.4s ease;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #003f7d;
+    }
+    input[type=text],
+    input[type=password] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #b8c7d9;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .captcha-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .captcha-text {
+      font-weight: 600;
+      font-size: 15px;
+      color: #333;
+    }
+    button {
+      background: linear-gradient(90deg, #005baa, #007bff);
+      color: #fff;
+      font-weight: 600;
+      width: 100%;
+      padding: 10px 0;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #007bff, #005baa);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .back-btn {
+      background: #e5efff;
+      color: #005baa;
+      font-weight: 600;
+      width: 100%;
+      padding: 8px 0;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: 0.2s;
+    }
+    .back-btn:hover {
+      background: #d5e6ff;
+    }
+    .about-box {
+      margin-top: 30px;
+      background: #f9fafb;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #444;
+      line-height: 1.5em;
+    }
+    .about-box h3 {
+      color: #005baa;
+      font-size: 15px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-container">
+  <img src="https://pustaka.ut.ac.id/lib/wp-content/uploads/2020/02/RBV-suaka-header1.jpg" alt="Header" style="width:100%;border-radius:12px 12px 0 0;margin-bottom:20px;">
+  
+  <h2 id="title">Pilih Jenis Pengguna</h2>
+
+  <!-- STEP 1: PILIH USER -->
+  <div id="user-step">
+    <div class="choice-btn" id="mahasiswa-btn">
+      <i class="bi bi-mortarboard-fill"></i> Mahasiswa
+    </div>
+    <div class="choice-btn" id="tutor-btn">
+      <i class="bi bi-person-video3"></i> Tutor
+    </div>
+  </div>
+
+  <!-- STEP 2: PILIH METODE LOGIN -->
+  <div id="method-step" style="display:none;">
+    <button class="back-btn" id="back-user"><i class="bi bi-arrow-left"></i> Ganti Jenis Pengguna</button>
+    <a href="oauth/login.php" class="choice-btn" id="sso-btn">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" width="20" alt="Microsoft">
+      Login dengan SSO O365-UT
+    </a>
+    <div class="choice-btn" id="elearning-btn">
+      <i class="bi bi-person-circle"></i> Login dengan Akun eLearning UT
+    </div>
+  </div>
+
+  <!-- STEP 3: FORM LOGIN -->
+  <div class="login-form" id="elearning-form">
+    <button class="back-btn" id="back-method"><i class="bi bi-arrow-left"></i> Ganti Metode Login</button>
+
+    <div class="form-group">
+      <label for="username">Username eLearning</label>
+      <input type="text" id="username" placeholder="Contoh: 01293847">
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Masukkan Password">
+    </div>
+
+    <div class="form-group">
+      <label for="captcha">Captcha</label>
+      <div class="captcha-row">
+        <span class="captcha-text">7 + 3 = ?</span>
+        <input type="text" id="captcha" maxlength="3" size="3">
+      </div>
+    </div>
+
+    <button type="button">Login</button>
+  </div>
+
+  <div class="about-box">
+    <h3>Tentang RBV</h3>
+    <p><strong>Ruang Baca Virtual (RBV)</strong> Universitas Terbuka adalah fasilitas pembelajaran digital yang menyediakan akses ke <em>Buku Materi Pokok</em> (BMP) dalam bentuk <em>full text</em> bagi mahasiswa dan tutor UT.</p>
+    <p>Seluruh isi dilindungi oleh <strong>Hak Kekayaan Intelektual (HAKI)</strong>. Dilarang menyimpan, menyalin, atau menyebarluaskan isi tanpa izin resmi dari Universitas Terbuka.</p>
+  </div>
+</div>
+
+<script>
+  const title = document.getElementById('title');
+  const userStep = document.getElementById('user-step');
+  const methodStep = document.getElementById('method-step');
+  const elearningForm = document.getElementById('elearning-form');
+
+  const mahasiswaBtn = document.getElementById('mahasiswa-btn');
+  const tutorBtn = document.getElementById('tutor-btn');
+  const backUser = document.getElementById('back-user');
+  const elearningBtn = document.getElementById('elearning-btn');
+  const backMethod = document.getElementById('back-method');
+
+  // STEP 1 -> STEP 2
+  function goToMethod(userType) {
+    title.innerText = `Pilih Metode Login (${userType})`;
+    userStep.style.display = 'none';
+    methodStep.style.display = 'block';
+  }
+
+  mahasiswaBtn.addEventListener('click', () => goToMethod('Mahasiswa'));
+  tutorBtn.addEventListener('click', () => goToMethod('Tutor'));
+
+  // STEP 2 -> STEP 3
+  elearningBtn.addEventListener('click', () => {
+    methodStep.style.display = 'none';
+    elearningForm.style.display = 'block';
+    title.innerText = "Login eLearning";
+  });
+
+  // BACK TO STEP 1
+  backUser.addEventListener('click', () => {
+    methodStep.style.display = 'none';
+    userStep.style.display = 'block';
+    title.innerText = "Pilih Jenis Pengguna";
+  });
+
+  // BACK TO STEP 2
+  backMethod.addEventListener('click', () => {
+    elearningForm.style.display = 'none';
+    methodStep.style.display = 'block';
+    title.innerText = "Pilih Metode Login";
+  });
+</script>
+
+</body>
+</html>

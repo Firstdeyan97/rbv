@@ -1,0 +1,3 @@
+<FilesMatch "\.(json|pem|key|env|crt|ini)$">
+    Require all denied
+</FilesMatch>

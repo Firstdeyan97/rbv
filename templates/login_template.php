@@ -202,7 +202,7 @@ function renderLogin($error='', $math='') {
 
         <div class="info-box">
         <p>
-            Masukan Username dan Password <strong>UT-Online (elearning.ut.ac.id)</strong> serta <strong>Captcha</strong>.
+            Masukan Username dan Password <strong>elearning.ut.ac.id</strong> atau <strong>silayar.ut.ac.id</strong> serta <strong>Captcha</strong>.
         </p>
         </div>
 
